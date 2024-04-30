@@ -6,7 +6,6 @@ import { useAuthStore } from '~/store/useAuthStore'; // import the auth store we
 
 const router = useRouter();
 
-
 const { logUserOut } = useAuthStore(); // use authenticateUser action from  auth store
 const { authenticated } = storeToRefs(useAuthStore()); // make authenticated state reactive with storeToRefs
 

@@ -10,12 +10,12 @@ export const useAuthStore = defineStore("auth", {
       this.loading = true;
 
       try {
-        const data = await $fetch("https://natslock.my.id/api/login", {
+        const data = await $fetch(config.public.apiBase +"/api/login", {
           method: "post",
           body: { users, pass, force },
         });
 
-        if(data){
+        if (data) {
           const token = useCookie("token"); // useCookie new hook in nuxt 3
           token.value = data.sessionId; // set token to cookie
           this.authenticated = true; // set authenticated  state value to true
@@ -30,11 +30,9 @@ export const useAuthStore = defineStore("auth", {
         const errorData = error.data;
         throw errorData;
       }
-      
     },
     async logUserOut() {
-      const { data, pending, error } = await $fetch(
-        "https://natslock.my.id/api/logout",
+      const { data, pending, error } = await $fetch(config.public.apiBase +"/api/logout",
         {
           method: "post",
           body: {
@@ -47,7 +45,37 @@ export const useAuthStore = defineStore("auth", {
       const token = useCookie("token"); // useCookie new hook in nuxt 3
       this.authenticated = false; // set authenticated  state value to false
       token.value = null; // clear the token cookie
-      localStorage.removeItem("user"); // remove user data from local storage
+      localStorage.removeItem("email"); // remove user data from local storage
+    },
+
+    async sessionWatcher() {
+      const token = useCookie("token"); // useCookie new hook in nuxt 3
+      const config = useRuntimeConfig()
+
+
+      if (token.value) {
+        try {
+          const data = await $fetch(config.public.apiBase + "/api/session/check", {
+            method: "POST",
+            body: {
+              users: localStorage.getItem("email")?.replace(/"/g, ""),
+              sessionid: token.value,
+            },
+          });
+          console.log(data);
+        } catch (error) {
+          console.error("Session error:", error.data);
+          if (error.data.result === false) {
+            const token = useCookie("token"); // useCookie new hook in nuxt 3
+            this.authenticated = false; // set authenticated  state value to false
+            token.value = null; // clear the token cookie
+            localStorage.removeItem("email"); // remove user data from local storage
+            console.log("session does not exist");
+          } else {
+            console.log("session exists");
+          }
+        }
+      }
     },
   },
 });
