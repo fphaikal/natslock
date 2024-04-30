@@ -7,6 +7,7 @@ export const useAuthStore = defineStore("auth", {
   }),
   actions: {
     async authenticateUser({ users, pass, force }) {
+      const config = useRuntimeConfig()
       this.loading = true;
 
       try {
@@ -32,6 +33,8 @@ export const useAuthStore = defineStore("auth", {
       }
     },
     async logUserOut() {
+      const config = useRuntimeConfig()
+
       const { data, pending, error } = await $fetch(config.public.apiBase +"/api/logout",
         {
           method: "post",
