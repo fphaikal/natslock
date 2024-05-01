@@ -80,5 +80,69 @@ export const useAuthStore = defineStore("auth", {
         }
       }
     },
+
+    async registerUser({ name, username, email, phone, password, verifyPassword, role }) {
+      const config = useRuntimeConfig()
+      const router = useRouter();
+
+      const phoneString = phone.toString();
+      this.loading = true;
+      try {
+        const data = await $fetch(config.public.apiBase + "/api/register", {
+          method: "post",
+          body: { 
+            name, 
+            username, 
+            email, 
+            phone: '62' + phoneString, 
+            password, 
+            verifypassword: verifyPassword, 
+            role
+          },
+        });
+
+        if (data.code === 200) {
+          router.push("/login");
+        }
+
+        // Successful login logic...
+        this.loading = false;
+      } catch (error) {
+        this.loading = false;
+        console.error("Register error:", error);
+        console.error("Register error:", error.data);
+        const errorData = error.data;
+        throw errorData;
+      }
+    },
+
+    async validationUser(users) {
+      const config = useRuntimeConfig()
+      this.loading = true;
+
+      try {
+        const data = await $fetch(config.public.apiBase + "/api/validation/getotp", {
+          method: "post",
+          body: {
+            users: users,
+          
+          },
+        });
+
+        if (data.code === 200) {
+          console.log("validation success");
+          
+        }
+
+        // Successful login logic...
+        this.loading = false;
+      } catch (error) {
+        this.loading = false;
+        console.error("Validation error:", error);
+        console.error("Validation error:", error.data);
+        const errorData = error.data;
+        throw errorData;
+      }
+    }
   },
 });
