@@ -12,7 +12,7 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   // if token exists and url is /login redirect to homepage
-  if (token.value && to?.name === 'login') {
+  if (token.value && to?.name === 'login' ) {
     return navigateTo('/');
   }
 

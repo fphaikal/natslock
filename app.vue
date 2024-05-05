@@ -22,3 +22,5 @@ onMounted(() => {
     </NuxtLayout>
   </div>
 </template>
+
+

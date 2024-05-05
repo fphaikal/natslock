@@ -13,6 +13,20 @@ const logout = () => {
   logUserOut();
   router.push('/login');
 };
+
+const config = useRuntimeConfig(); // get runtime config
+
+const lockerData = ref([]);
+
+const locker = async () => {
+  lockerData.value = await $fetch(config.public.apiBase + '/api/lockerdb/all');
+  console.log(lockerData);
+};
+
+onMounted(() => {
+  locker();
+});
+
 </script>
 <template>
   <div v-if="!token" class="h-screen bg-cover"
@@ -28,16 +42,17 @@ const logout = () => {
       </div>
     </div>
   </div>
-  <div v-else class="h-screen bg-cover"
-    style="background-image: linear-gradient(to top, rgba(0,0,0,0.8) , rgba(255,255,255,0)), url(banner.jpeg)">
-    <div class="flex flex-col justify-center h-full w-full p-10">
-      <div class="flex flex-col">
-        <h1 class="text-4xl font-bold text-blue-400">Hello</h1>
+  <div v-else class="h-screen pb-20">
+    <div class="flex flex-col bg-secondary dark:bg-dark w-full p-10 justify-between h-full">
+      <div class="flex mx-auto">
+        <h1 class="text-2xl">Natslock</h1>
       </div>
-      <div v-if="authenticated" class="loginBtn" style="float: right">
-        <nuxt-link @click="logout" class="btn">Logout</nuxt-link>
+      <div class="grid grid-cols-2 gap-3 my-auto">
+        <div v-for="l in lockerData"
+          class="text-secondary bg-primary dark:bg-dark2 h-32 flex justify-center items-center rounded-xl">
+          {{ l.name }}
+        </div>
       </div>
     </div>
-
   </div>
 </template>

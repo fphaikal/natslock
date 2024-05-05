@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '~/store/useAuthStore';
 
-const { authenticateUser, validationUser } = useAuthStore();
+const { authenticateUser, validationUser, sendOtpUsers } = useAuthStore();
 const { authenticated } = storeToRefs(useAuthStore());
 
 const router = useRouter()
@@ -16,16 +16,18 @@ const user = ref({
   force: false
 })
 
+const code = ref('')
+
 const error = ref(false)
 const errorMessage = ref('')
 
 const login = async () => {
+  error.value = false
   try {
     await authenticateUser(user.value);
     if (authenticated.value) { 
       router.push('/') 
     }
-    error.value = false
   } catch (err) {
     error.value = true    
     console.log(err)
@@ -39,11 +41,26 @@ const forceLogin = () => {
 }
 
 const verificationOtp = () => {
-  validationUser(user.value.users)
+  try {
+    validationUser(user.value.users)
 
-  if(validationUser.value){
-    router.push('/register')
-  
+    console.log(validationUser.value)
+    console.log(validationUser.code)
+
+
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const sendOtp = async () => {
+  try {
+    sendOtpUsers(code.value, user.value.users)
+    error.value = false
+  } catch (err) {
+    error.value = true    
+    console.log(err)
+    errorMessage.value = err 
   }
 }
 </script>
@@ -66,8 +83,9 @@ const verificationOtp = () => {
       </div>
       <input type="text" v-model="user.users" placeholder="Email" class="py-2 px-4 bg-gray-100 dark:bg-dark2 text-black dark:text-white rounded-full" />
       <input type="password" v-model="user.pass" placeholder="Password" class="py-2 px-4 bg-gray-100 dark:bg-dark2 text-black dark:text-white rounded-full" />
+      <NuxtLink to="">Forgot Password?</NuxtLink>
       <button @click.prevent="login" class="bg-blue-400 text-white font-bold py-2 px-4 rounded-full">Login</button>
-      <p class="text-center text-dark">Belum Memiliki Akun? Silahkan Untuk <NuxtLink to="/register" class="text-primary">Register</NuxtLink></p>
+      <p class="text-center text-dark dark:text-secondary">Belum Memiliki Akun? Silahkan Untuk <NuxtLink to="/register" class="text-primary">Register</NuxtLink></p>
     </div>
     <button aria-label="Color Mode"
       class="flex w-full items-center space-x-3 py-2 px-4 bg-blue-400 dark:bg-dark2 text-blue-50 dark:text-blue-50 rounded-full"
@@ -79,16 +97,12 @@ const verificationOtp = () => {
     </button>
   </div>
   <!-- Open the modal using ID.showModal() method -->
-<button class="btn" onclick="my_modal_1.showModal()">open modal</button>
-<dialog id="my_modal_1" class="modal">
-  <div class="modal-box">
-    <h3 class="font-bold text-lg">Hello!</h3>
-    <p class="py-4">Press ESC key or click the button below to close</p>
-    <div class="modal-action">
-      <form method="dialog">
-        <!-- if there is a button in form, it will close the modal -->
-        <button class="btn">Close</button>
-      </form>
+<dialog id="otp" class="modal">
+  <div class="modal-box dark:bg-dark">
+    <h3 class="font-bold text-lg mb-3">Verification</h3>
+    <div class="flex justify-between gap-3">
+      <input type="text" v-model="code" placeholder="OTP" class="py-2 px-4 bg-gray-100 dark:bg-dark2 text-black dark:text-white rounded-full w-full" />
+      <button @click.prevent="sendOtp" class="bg-blue-400 text-white font-bold py-2 px-4 rounded-full">Submit</button>
     </div>
   </div>
 </dialog>

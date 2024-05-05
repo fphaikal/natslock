@@ -7,20 +7,24 @@ export const useAuthStore = defineStore("auth", {
   }),
   actions: {
     async authenticateUser({ users, pass, force }) {
-      const config = useRuntimeConfig()
+      const config = useRuntimeConfig();
       this.loading = true;
 
       try {
-        const data = await $fetch(config.public.apiBase +"/api/login", {
+        const data = await $fetch(config.public.apiBase + "/api/login", {
           method: "post",
           body: { users, pass, force },
         });
 
         if (data) {
           const token = useCookie("token"); // useCookie new hook in nuxt 3
-          token.value = data.sessionId; // set token to cookie
+          const _id = useCookie("_id"); // useCookie new hook in nuxt 3
+          const role = useCookie("role"); // useCookie new hook in nuxt 3
+
           this.authenticated = true; // set authenticated  state value to true
-          localStorage.setItem("email", JSON.stringify(data.data.Email)); // store user data in local storage
+          token.value = data.sessionId; // set token to cookie
+          _id.value = data.data.UUID; // set _id to cookie
+          role.value = data.data.Role; // set role to cookie
         }
 
         // Successful login logic...
@@ -33,9 +37,10 @@ export const useAuthStore = defineStore("auth", {
       }
     },
     async logUserOut() {
-      const config = useRuntimeConfig()
+      const config = useRuntimeConfig();
 
-      const { data, pending, error } = await $fetch(config.public.apiBase +"/api/logout",
+      const { data, pending, error } = await $fetch(
+        config.public.apiBase + "/api/logout",
         {
           method: "post",
           body: {
@@ -48,31 +53,37 @@ export const useAuthStore = defineStore("auth", {
       const token = useCookie("token"); // useCookie new hook in nuxt 3
       this.authenticated = false; // set authenticated  state value to false
       token.value = null; // clear the token cookie
-      localStorage.removeItem("email"); // remove user data from local storage
+      this.userData = null; // Clear user data
+
     },
 
     async sessionWatcher() {
       const token = useCookie("token"); // useCookie new hook in nuxt 3
-      const config = useRuntimeConfig()
-
+      const config = useRuntimeConfig();
+      const email = this.userData;
+      console.log(email);
 
       if (token.value) {
         try {
-          const data = await $fetch(config.public.apiBase + "/api/session/check", {
-            method: "POST",
-            body: {
-              users: localStorage.getItem("email")?.replace(/"/g, ""),
-              sessionid: token.value,
-            },
-          });
+          const uuid = useCookie("_id");
+          const data = await $fetch(
+            config.public.apiBase + "/api/session/check",
+            {
+              method: "POST",
+              body: {
+                users: uuid.value,
+                sessionid: token.value,
+              },
+            }
+          );
           console.log(data);
         } catch (error) {
+          console.error("Session error:", error);
           console.error("Session error:", error.data);
           if (error.data.result === false) {
             const token = useCookie("token"); // useCookie new hook in nuxt 3
             this.authenticated = false; // set authenticated  state value to false
             token.value = null; // clear the token cookie
-            localStorage.removeItem("email"); // remove user data from local storage
             console.log("session does not exist");
           } else {
             console.log("session exists");
@@ -81,8 +92,16 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    async registerUser({ name, username, email, phone, password, verifyPassword, role }) {
-      const config = useRuntimeConfig()
+    async registerUser({
+      name,
+      username,
+      email,
+      phone,
+      password,
+      verifyPassword,
+      role,
+    }) {
+      const config = useRuntimeConfig();
       const router = useRouter();
 
       const phoneString = phone.toString();
@@ -90,14 +109,14 @@ export const useAuthStore = defineStore("auth", {
       try {
         const data = await $fetch(config.public.apiBase + "/api/register", {
           method: "post",
-          body: { 
-            name, 
-            username, 
-            email, 
-            phone: '62' + phoneString, 
-            password, 
-            verifypassword: verifyPassword, 
-            role
+          body: {
+            name,
+            username,
+            email,
+            phone: "62" + phoneString,
+            password,
+            verifypassword: verifyPassword,
+            role,
           },
         });
 
@@ -117,32 +136,70 @@ export const useAuthStore = defineStore("auth", {
     },
 
     async validationUser(users) {
-      const config = useRuntimeConfig()
+      const config = useRuntimeConfig();
       this.loading = true;
 
       try {
-        const data = await $fetch(config.public.apiBase + "/api/validation/getotp", {
-          method: "post",
-          body: {
-            users: users,
-          
-          },
-        });
+        const data = await $fetch(
+          config.public.apiBase + "/api/validation/getotp",
+          {
+            method: "post",
+            body: {
+              users: users,
+            },
+          }
+        );
 
         if (data.code === 200) {
           console.log("validation success");
-          
+          document.getElementById("otp").showModal();
         }
 
         // Successful login logic...
         this.loading = false;
+
+        console.log(data);
+        return data;
       } catch (error) {
         this.loading = false;
         console.error("Validation error:", error);
-        console.error("Validation error:", error.data);
-        const errorData = error.data;
+        const errorData = error;
+        return errorData;
+      }
+    },
+
+    async sendOtpUsers(code, users) {
+      const config = useRuntimeConfig();
+      this.loading = true;
+
+      try {
+        const data = await $fetch(
+          config.public.apiBase + "/api/validation/giveotp",
+          {
+            method: "post",
+            body: {
+              code,
+              users,
+            },
+          }
+        );
+
+        if (data.code === 200) {
+          console.log("otp success");
+          document.getElementById("otp").close();
+        }
+
+        // Successful login logic...
+        this.loading = false;
+
+        console.log(data);
+        return data;
+      } catch (error) {
+        this.loading = false;
+        console.error("Otp error:", error);
+        const errorData = error;
         throw errorData;
       }
-    }
+    },
   },
 });
