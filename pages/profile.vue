@@ -24,7 +24,7 @@ const { data } = await useFetch(config.public.apiBase + '/api/userdb/' + id.valu
         <h1 class="text-2xl">Profile</h1>
       </div>
       <div class="flex flex-col gap-2">
-        <div class="ms-10 w-32 h-32 md:w-40 md:h-40 relative -mt-20 border-4 border-white dark:border-dark rounded-full overflow-hidden">
+        <div class="w-32 h-32 md:w-40 md:h-40 mx-auto border-white dark:border-dark rounded-full overflow-hidden mb-5">
           <img class="object-cover object-center" :src="data.Picture || ''" />
         </div>
         <h1 class="border-b pb-2">Name: {{ data.Name }}</h1>

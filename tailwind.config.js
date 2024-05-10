@@ -20,9 +20,12 @@ export default {
           '800': '#0a5d82',
           '900': '#0e4d6c',
           '950': '#093248',
+        },
       },
-      
-      },
+      backgroundImage: theme => ({
+        'gradient-to-45': 
+            'linear-gradient(45deg, #ffed4a, #ff3860)',
+      })
     },
   },
   plugins: [require("daisyui")],
