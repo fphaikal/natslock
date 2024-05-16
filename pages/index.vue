@@ -27,6 +27,9 @@ const locker = async () => {
 
 onMounted(() => {
   locker();
+  setInterval(() => {
+    locker();
+  }, 1000);
 });
 
 const rentLocker = async (id) => {
@@ -138,6 +141,21 @@ const enterUnrentCodeReq = async () => {
     document.getElementById("enterUnrentCode").close();
   }
 };
+
+const cancelReq = async () => {
+  const res = await $fetch(config.public.apiBase + '/api/locker/cancel', {
+    method: 'POST',
+    body: {
+      lockers: selectedLockerId.value,
+      users: _id.value,
+    },
+  });
+  if (res.code === 200) {
+    document.getElementById("enterCode").close();
+    document.getElementById("enterUnrentCode").close();
+    document.getElementById("enterOpenCode").close();
+  }
+};
 </script>
 
 <template>
@@ -184,7 +202,7 @@ const enterUnrentCodeReq = async () => {
       <div class="modal-action">
         <form method="dialog">
           <!-- if there is a button in form, it will close the modal -->
-          <button class="btn">Close</button>
+          <button class="btn" @click.prevent="cancelReq">Close</button>
         </form>
       </div>
     </div>
@@ -201,7 +219,7 @@ const enterUnrentCodeReq = async () => {
       <div class="modal-action">
         <form method="dialog">
           <!-- if there is a button in form, it will close the modal -->
-          <button class="btn">Close</button>
+          <button class="btn" @click.prevent="cancelReq">Close</button>
         </form>
       </div>
     </div>
@@ -217,7 +235,7 @@ const enterUnrentCodeReq = async () => {
       <div class="modal-action">
         <form method="dialog">
           <!-- if there is a button in form, it will close the modal -->
-          <button class="btn">Close</button>
+          <button class="btn" @click.prevent="cancelReq">Close</button>
         </form>
       </div>
     </div>
