@@ -83,7 +83,6 @@ const sendOtp = async () => {
       </div>
       <input type="text" v-model="user.users" placeholder="Email" class="py-2 px-4 bg-gray-100 dark:bg-dark2 text-black dark:text-white rounded-full" />
       <input type="password" v-model="user.pass" placeholder="Password" class="py-2 px-4 bg-gray-100 dark:bg-dark2 text-black dark:text-white rounded-full" />
-      <NuxtLink to="">Forgot Password?</NuxtLink>
       <button @click.prevent="login" class="bg-blue-400 text-white font-bold py-2 px-4 rounded-full">Login</button>
       <p class="text-center text-dark dark:text-secondary">Belum Memiliki Akun? Silahkan Untuk <NuxtLink to="/register" class="text-primary">Register</NuxtLink></p>
     </div>

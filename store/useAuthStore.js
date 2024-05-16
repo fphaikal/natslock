@@ -128,7 +128,6 @@ export const useAuthStore = defineStore("auth", {
         this.loading = false;
       } catch (error) {
         this.loading = false;
-        console.error("Register error:", error);
         console.error("Register error:", error.data);
         const errorData = error.data;
         throw errorData;

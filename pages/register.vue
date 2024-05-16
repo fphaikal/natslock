@@ -24,7 +24,14 @@ const error = ref(false)
 const errorMessage = ref('')
 
 const register = async () => {
-  registerUser(user.value)
+  error.value = false
+  try {
+    await registerUser(user.value)
+  } catch (error) {
+    error.value = true    
+    console.log(err)
+    errorMessage.value = err 
+  }
 }
 
 </script>
@@ -37,6 +44,10 @@ const register = async () => {
     </div>
     <div class="flex flex-col gap-3">
       <h1 class="text-2xl font-bold text-center">Register</h1>
+      <div v-if="error" role="alert" class="alert">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span>{{ errorMessage.message }}</span>
+      </div>
       <input type="name" v-model="user.name" placeholder="Name" class="py-2 px-4 bg-gray-100 dark:bg-dark2 text-black dark:text-white rounded-full" />
       <input type="username" v-model="user.username" placeholder="Username" class="py-2 px-4 bg-gray-100 dark:bg-dark2 text-black dark:text-white rounded-full" />
       <input type="email" v-model="user.email" placeholder="Email" class="py-2 px-4 bg-gray-100 dark:bg-dark2 text-black dark:text-white rounded-full" />
